@@ -3,6 +3,7 @@ package nl.gerben_meijer.gerryflap.sensorwater.Water;
 import android.graphics.Canvas;
 import android.util.Log;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -16,7 +17,7 @@ public class Water {
     private float dx;
     private float dy;
     private static final double COHESIVENESS = 30;
-    private static final double WEIGHT = 3;
+    private static final double WEIGHT = 8;
     public static WaterController waterController;
 
     public Water(float x, float y){
@@ -27,11 +28,12 @@ public class Water {
     }
 
     public void calculateCohesion(){
-        Water[] waters = waterController.getWaters();
+        List<Water> waters = waterController.getToBeCalculated();
         for (Water w: waters){
             if(!w.equals(this) && w != null){
                 float[] cohesion = getCohesionTo(w);
                 accelerate(cohesion[0], cohesion[1]);
+                w.accelerate(-cohesion[0], -cohesion[1]);
             }
         }
     }

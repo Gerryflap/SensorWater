@@ -8,6 +8,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Gerryflap on 2015-02-17.
  */
@@ -15,8 +18,10 @@ public class WaterController implements SensorEventListener{
 
     public int WIDTH = 1000;
     public int HEIGHT = 1000;
-    private static final int WATER_NUM = 30;
+    private static final int WATER_NUM = 40;
 
+    private List<Water> toBeCaluculated;
+    private List<Water> waterClone;
     private Water[] waters;
     private WaterView waterView;
     private Sensor sensor;
@@ -27,13 +32,17 @@ public class WaterController implements SensorEventListener{
 
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
-        sensorManager.registerListener(this, sensor, 60);
+        sensorManager.registerListener(this, sensor, 40);
 
+
+        this.waterClone = new ArrayList<Water>();
+        this.toBeCaluculated = new ArrayList<Water>();
         this.waterView = waterView;
         Water.waterController = this;
         waters = new Water[WATER_NUM];
         for(int i = 0; i < waters.length; i++){
             waters[i] = new Water(i/5, i%5);
+            waterClone.add(waters[i]);
         }
     }
 
@@ -41,10 +50,16 @@ public class WaterController implements SensorEventListener{
         return waters;
     }
 
+    public List<Water> getToBeCalculated(){
+        return this.toBeCaluculated;
+    }
+
     public void calculateWaterLocations(float ddx, float ddy){
+        toBeCaluculated.addAll(waterClone);
         for(Water w: waters){
             w.calculateCohesion();
             w.accelerate(ddx, ddy);
+            toBeCaluculated.remove(w);
         }
 
         for(Water w: waters) {
